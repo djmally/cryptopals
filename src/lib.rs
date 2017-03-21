@@ -23,6 +23,19 @@ fn hex_str_to_byte_vec(s: &str) -> Vec<u8> {
     out
 }
 
+// Utility - compute the Hamming distance between two strings in terms of different bits
+fn hamming_dist(s1: &str, s2: &str) -> usize {
+    let (bytes1, bytes2) = (s1.as_bytes(), s2.as_bytes());
+    let mut diff = 0;
+    for (b1, b2) in bytes1.iter().zip(bytes2.iter()) {
+        let xor = b1 ^ b2;
+        for i in 0..8 {
+            diff += ((xor >> i) & 0x01) as usize;
+        }
+    }
+    diff
+}
+
 // Challenge 1
 pub fn h2b(bytes: &[u8]) -> String {
     let mut bytes: Vec<u8> = bytes.iter().cloned().collect();
@@ -168,5 +181,16 @@ mod tests {
         for (o, r) in output.iter().zip(result.iter()) {
             assert_eq!(o, r);
         }
+    }
+
+    #[test]
+    fn test_hamming_dist_1() {
+        let s1 = "this is a test";
+        let s2 = "wokka wokka!!!";
+        let output = 37;
+
+        let result = hamming_dist(s1, s2);
+
+        assert_eq!(output, result);
     }
 }
