@@ -1,6 +1,7 @@
 [package]
-name = "hex2base64"
+name = "cryptopals-set1"
 version = "0.1.0"
-authors = ["david <dmally@synack.com>"]
+authors = ["djmally <djmally@gmail.com>"]
 
 [dependencies]
+nalgebra = "0.11.2"
