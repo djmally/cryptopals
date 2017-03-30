@@ -2,7 +2,8 @@
 pub fn fixed_xor(buf1: &[u8], buf2: &[u8]) -> Vec<u8> {
     assert_eq!(buf1.len(), buf2.len());
 
-    buf1.iter().zip(buf2.iter()).fold(Vec::new(), |mut acc, (&b1, &b2)| { acc.push(b1 ^ b2); acc })
+    buf1.iter().zip(buf2.iter())
+        .fold(Vec::with_capacity(buf1.len()), |mut acc, (&b1, &b2)| { acc.push(b1 ^ b2); acc })
 }
 
 

@@ -1,5 +1,7 @@
 #![feature(step_by)]
 
+extern crate nalgebra;
+
 mod challenge1;
 mod challenge2;
 mod challenge3;
