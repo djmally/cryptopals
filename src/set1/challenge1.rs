@@ -1,10 +1,11 @@
-use utils;
+use set1::utils;
 
 const ENCODING: &'static [u8; 65] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 const MASK: u32 = 0x3F;
 const STEP: usize = 3;
 
 // Challenge 1
+// Converts the input bytes into a base64-encoded String
 pub fn base64(bytes: &[u8]) -> String {
     let mut bytes: Vec<u8> = bytes.iter().cloned().collect();
 

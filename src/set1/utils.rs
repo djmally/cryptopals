@@ -15,6 +15,11 @@ pub fn hex_str_to_byte_vec(s: &str) -> Vec<u8> {
         }
         buf.push(c);
     }
+    while buf.len() % 2 == 1 {
+        // Pad the buffer as necessary
+        buf.push('0');
+    }
+    // Flush any remaining characters
     out.push(i64::from_str_radix(&buf, 16).expect("Invalid hex literal") as u8);
     out
 }
@@ -41,7 +46,7 @@ pub fn count_ascii(bytes: &[u8]) -> usize {
         //  A - Z
         (c >= 0x41 && c <= 0x5A) ||
         //   a - z
-        (c >= 0x61 && c <= 0x79) {
+        (c >= 0x61 && c <= 0x7A) {
             acc += 1
         }
         acc
@@ -50,13 +55,75 @@ pub fn count_ascii(bytes: &[u8]) -> usize {
 
 // Utility - find the byte vector(s) with the largest number of ASCII characters, with a tolerance
 // of being within 2 of the max. Returns a vector of (u8, &String) tuples, where the u8 is
-// the key used to decrypt the string
+// the key used to decrypt the string. May crash if no max is found
 pub fn most_ascii<'a>(slices: &[Vec<u8>]) -> Vec<(u8, &Vec<u8>)> {
     let score: HashMap<(u8, &Vec<u8>), usize> = slices.iter().enumerate().map(|(idx, slice)| ((idx as u8, slice), count_ascii(slice))).collect();
 
     // TODO? Remove this expect
-    let max = *(score.iter().max_by_key(|&(ref k, v)| v).expect("No max found").1);
+    let max: usize = *(score.iter().max_by_key(|&(ref k, v)| v).expect("No max found").1);
 
-    let (keys, _): (Vec<(u8, &Vec<u8>)>, Vec<_>) = score.into_iter().filter(|&(ref k, v)| v <= max && v >= max - 2).unzip();
+    let threshold = 2;
+    if max < threshold { return vec![]; }
+
+    let (keys, _): (Vec<(u8, &Vec<u8>)>, Vec<_>) = score.into_iter()
+                    .filter(|&(ref k, v)| v <= max && v >= max - threshold).unzip();
     keys
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hex_str_to_byte_vec() {
+        let s = "0123456789ABCDEF";
+        assert_eq!(hex_str_to_byte_vec(s), vec![0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF]);
+
+        let s = "0123456789ABCDE";
+        assert_eq!(hex_str_to_byte_vec(s), vec![0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xE0]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_hex_str_to_byte_vec_panics() {
+        hex_str_to_byte_vec("xyz");
+    }
+
+    #[test]
+    fn test_hamming_dist() {
+        let s1 = "0";
+        let s2 = "1";
+        assert_eq!(1, hamming_dist(s1.as_bytes(), s2.as_bytes()));
+
+        let s1 = "0";
+        let s2 = "3";
+        assert_eq!(2, hamming_dist(s1.as_bytes(), s2.as_bytes()));
+
+        let s1 = "this is a test";
+        let s2 = "wokka wokka!!!";
+        assert_eq!(37, hamming_dist(s1.as_bytes(), s2.as_bytes()));
+    }
+
+    #[test]
+    fn test_count_ascii() {
+        let input = "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()œåΩ∑ß≈®ƒ√†©∫¥∆µø¬≤π…≥÷“æ‘«≠";
+        assert_eq!(36, count_ascii(input.as_bytes()));
+    }
+
+    #[test]
+    fn test_most_ascii() {
+        let slices = vec![String::from("abcdefghijklm").into_bytes(),
+                          String::from("nopqrstuvwxyz1234567890").into_bytes(),
+                          String::from("!@#$%^&*()œ").into_bytes(),
+                          String::from("åΩ∑ß≈®ƒ√†©∫¥∆µø¬≤π…≥÷“æ‘«≠").into_bytes()];
+        let most = most_ascii(slices.as_slice());
+        assert_eq!(most.len(), 1);
+        assert_eq!(most[0], (1, &slices[1]));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_most_ascii_panics() {
+        most_ascii(&vec![]);
+    }
 }

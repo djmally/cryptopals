@@ -1,5 +1,7 @@
 
-// Challenge 5
+// Challenge 5 Utility
+// Computes a bytewise XOR of a byte slice and some key in byte form. For example, if the input
+// string is "ABCDEFG" and the key is "123", the computed XOR will be "ABCDEFG" ^ "123123".
 pub fn repeating_key_xor(bytes: &[u8], key: &[u8]) -> Vec<u8> {
     bytes.iter().enumerate().fold(Vec::with_capacity(bytes.len()), |mut acc, (idx, byte)| {
         acc.push(byte ^ (key[idx % key.len()]));
@@ -11,8 +13,10 @@ pub fn repeating_key_xor(bytes: &[u8], key: &[u8]) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use utils;
+    use set1::utils;
 
+    // Challenge 5
+    // Encrypts the input string with the input key, using repeating_key_xor
     #[test]
     fn challenge_5() {
         let input = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";

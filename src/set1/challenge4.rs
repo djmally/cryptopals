@@ -7,9 +7,12 @@ mod tests {
     use std::fs::File;
     use std::str;
 
-    use challenge3;
-    use utils;
+    use set1::challenge3;
+    use set1::utils;
 
+    // Challenge 4
+    // Finds the brute-forced decryption of a line in the input file, using the method from
+    // `challenge3.rs`, but applied to every line in the input file.
     #[test]
     fn challenge_4() {
         let f = File::open("data/4.txt").unwrap();
